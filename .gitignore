@@ -1,0 +1,25 @@
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+.venv/
+venv/
+
+# VS Code
+.vscode/
+.vscode/settings.json      # Allow settings.json (optional)
+.vscode/extensions.json    # Allow extensions.json (optional)
+
+# Environment / config
+.env
+*.env
+
+# Jupyter/other temp files
+.ipynb_checkpoints/
+
+# OS-specific
+.DS_Store
+Thumbs.db
