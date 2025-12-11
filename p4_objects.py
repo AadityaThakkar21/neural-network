@@ -15,15 +15,30 @@ class Layer_Dense:
         self.weights = .1*np.random.randn(n_inputs, n_neurons)   # Set so that we dont have to do a transpose everytime
         self.biases = np.zeros((1, n_neurons))
     def forward(self, inputs):
-        self.outputs = np.dot(inputs, self.weights) + self.biases
+        self.output = np.dot(inputs, self.weights) + self.biases
     
 class Activation_ReLU:
     def forward(self, inputs):
-        self.outputs = np.maximum(0, inputs)  
+        self.output = np.maximum(0, inputs)  
     
-layer1 = Layer_Dense(4, 5)
+class Activation_Softmax:
+    def forward(self, inputs):
+        exp_values = np.exp(inputs - np.max(inputs, axis = 1, keepdims=True))
+        probabilites = exp_values/ np.sum(exp_values, axis = 1, keepdims=True)
+        self.output = probabilites
+    
+X, y = spiral_data(samples=100, classes = 3)
+
+dense1 = Layer_Dense(2,3)
 activation1 = Activation_ReLU()
 
-layer1.forward(X)
-print(layer1.outputs)
-activation1.forward(layer1.output)
+dense2 = Layer_Dense(3, 3)
+activation2 = Activation_Softmax()
+
+dense1.forward(X)
+activation1.forward(dense1.output)
+
+dense2.forward(activation1.output)
+activation2.forward(dense2.output)
+
+print(activation2.output)
