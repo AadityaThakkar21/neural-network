@@ -4,11 +4,11 @@ from nnfs.datasets import spiral_data
 
 nnfs.init()
 
-X, y = spiral_data(100, 3)
+# X, y = spiral_data(100, 3)
 
-X = [[1, 2, 3, 2.5], 
-    [2.0, 5.0, -1.0, 2.0],
-    [-1.5, 2.7, 3.3, -0.8]]
+# X = [[1, 2, 3, 2.5], 
+#     [2.0, 5.0, -1.0, 2.0],
+#     [-1.5, 2.7, 3.3, -0.8]]
 
 class Layer_Dense:
     def __init__(self, n_inputs, n_neurons):
@@ -23,10 +23,31 @@ class Activation_ReLU:
     
 class Activation_Softmax:
     def forward(self, inputs):
+        # Subtracting the max value helps set the values of y = e^x between 0 and 1
         exp_values = np.exp(inputs - np.max(inputs, axis = 1, keepdims=True))
         probabilites = exp_values/ np.sum(exp_values, axis = 1, keepdims=True)
         self.output = probabilites
     
+class Loss:
+    def calculate(self, output, y):
+        sample_losses = self.forward(output, y)
+        data_loss = np.mean(sample_losses)
+        return data_loss
+
+class Loss_CategoricalClassEntropy(Loss):
+    def forward(self, y_pred, y_true):
+        sample = len(y_pred)
+        y_pred_clipped = np.clip(y_pred, 1e-7, 1 - 1e-7)   # To prevent the case of log(0)
+
+        if len(y_true.shape) == 1:         # to check if its a scalar
+            correct_confidences = y_pred_clipped[range(sample), y_true]
+            
+        elif len(y_true.shape) == 2:       # for a 2D array
+            correct_confidences = np.sum((y_pred_clipped*y_true), axis = 1)
+        
+        negative_log_likelihood = -np.log(correct_confidences)
+        return negative_log_likelihood
+        
 X, y = spiral_data(samples=100, classes = 3)
 
 dense1 = Layer_Dense(2,3)
@@ -42,3 +63,8 @@ dense2.forward(activation1.output)
 activation2.forward(dense2.output)
 
 print(activation2.output)
+
+loss_function = Loss_CategoricalClassEntropy()
+loss = loss_function.calculate(activation2.output, y)
+
+print ("Loss = ",loss)
